@@ -4,6 +4,11 @@ A minimal research prototype for **Epistemic-Gated Bootstrapped DQN** on `BabyAI
 
 *Note: This project is currently in active development and subject to significant changes.*
 
+## Reports
+
+- [Full Technical Report](https://github.com/Vab-jain/eg_bdqn/blob/main/report/preliminary_findings/preliminary_findings.pdf)
+- [Short Research Summary](https://github.com/Vab-jain/eg_bdqn/blob/main/report/preliminary_summary/executive_summary.pdf)
+
 ## Execution Modes
 
 | Mode | Oracle | Gating | Purpose |
