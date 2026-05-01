@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Jupyter Notebook
+*.ipynb
+.ipynb_checkpoints
+
+# Environment
+.env
+.venv/
+env/
+venv/
+
+# Mac OS
+.DS_Store
+
+# Project specific
+logs/
+saved_models/
+plots/
+
+# LaTeX Auxiliary Files
+*.aux
+*.bbl
+*.blg
+*.brf
+*.fls
+*.fdb_latexmk
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.dvi
+*.bcf
+*.run.xml

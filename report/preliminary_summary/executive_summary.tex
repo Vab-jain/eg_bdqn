@@ -1,0 +1,81 @@
+% !TEX program = pdflatex
+\documentclass[11pt, a4paper]{article}
+
+% ─── Packages ────────────────────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage[font=small, labelfont=bf]{caption}
+\usepackage{subcaption}
+\usepackage{microtype}
+\usepackage{natbib}
+\usepackage{authblk}
+\usepackage{lineno}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    citecolor=green!50!black,
+    urlcolor=blue!60!black,
+}
+
+% ─── Title ───────────────────────────────────────────────────────────────────
+\title{%
+    \textbf{Executive Summary: Epistemic Gated Bootstrapped DQN (EG-BDQN)} \\[0.3em]
+    % \large Preliminary Findings on Budget-Constrained Oracle Supervision \\
+    % for Guided Exploration in Discrete Reasoning Tasks%
+}
+
+\author{Vaibhav Jain}
+\affil{vaja00001@uni-saarland.de}
+\date{April 2026}
+
+
+\begin{document}
+\maketitle
+
+\section*{The Problem}
+Integrating Large Language Models (LLMs) as interactive advisors in reinforcement learning (RL) offers a method for addressing sparse-reward and hard-exploration tasks. However, querying high-latency external models at every timestep is computationally prohibitive. A standard solution is to gate these queries, requesting assistance only when necessary. Existing entropy-gated methods encounter two primary limitations. First, they conflate environmental stochasticity (aleatoric uncertainty) with agent ignorance (epistemic uncertainty), leading to inefficient query allocation in inherently noisy states. Second, injecting external actions into standard on-policy RL pipelines corrupts the agent's surrogate objective, causing the actor to improperly attribute the oracle's success to its own policy.
+
+\section*{Our Approach: Epistemic Gated Bootstrapped DQN (EG-BDQN)}
+We propose Epistemic Gated Bootstrapped DQN (EG-BDQN) to frame oracle assistance as a budgeted querying problem. Rather than relying on raw policy entropy, we utilize the variance across the Q-network heads native to Bootstrapped DQN. This yields a mathematically grounded estimate of epistemic uncertainty ($U_{ep}$), enabling the agent to restrict oracle queries to states where it lacks robust value estimates. 
+
+To address credit assignment contamination, we combine this gating mechanism with an off-policy, dual-buffer absorption strategy. By routing both agent-generated and oracle-generated demonstrations into DQN's off-policy replay buffer, the Q-heads independently learn the value of expert trajectories via standard temporal-difference updates. This allows the agent to utilize oracle guidance without destabilizing its internal learning dynamics.
+
+\section*{Empirical Observations: Efficiency and Covariate Shift}
+Initial experiments on the BabyAI \texttt{GoToDoor-v0} environment, restricted to an oracle query budget of 5\% of total training timesteps, demonstrated clear efficiency gains. Using a dynamic, budget-aware threshold ($\tau_t$) alongside a minimum query floor (mixture gating), the EG-BDQN agent achieved higher peak sample efficiency and more rapid early learning than standard baselines by actively targeting its knowledge gaps.
+
+However, stabilizing the gating dynamics revealed a significant distributional failure mode. Upon exhaustion of the oracle budget, the agent's performance collapsed.
+
+This collapse is a severe instance of covariate shift, closely related to the deployment mismatch formalized in DAgger~\citep{ross2011reduction}. During training, the oracle systematically redirects the agent away from failure states, shaping a restricted state visitation distribution ($d_{train}$). As a result, the agent learns localized policy fragments around assisted trajectories rather than robust, long-horizon recovery strategies. Furthermore, Bellman updates propagate optimistic Q-values under the implicit assumption of continuous oracle intervention. When the budget is depleted and the agent transitions to pure autonomous execution ($d_{deploy}$), it enters out-of-distribution states where its Q-values are miscalibrated, leading to rapid performance degradation.
+
+\section*{Future Directions}
+The observed covariate shift highlights a fundamental challenge in neuro-symbolic RL: safe oracle-to-autonomous policy transfer. Addressing this distributional mismatch is a prerequisite for scaling budgeted supervision to complex reasoning tasks. 
+
+Immediate next steps will focus on mitigating this covariate shift:
+\begin{enumerate}
+    \item \textbf{Conservative Q-Learning (CQL):} Applying CQL to penalize out-of-distribution autonomous actions and regularize optimistic Q-values.
+    \item \textbf{Gradual Rollout Mixing:} Implementing DAgger-style hand-offs and autonomous validation phases prior to budget exhaustion, forcing the agent to learn recovery policies on its own deployment distribution.
+    \item \textbf{Scaling to LLM Oracles:} Utilizing these mitigation strategies to safely replace the surrogate heuristic oracle with state-of-the-art LLMs, evaluating the architecture against stochastic advice quality and realistic latency constraints.
+\end{enumerate}
+
+\vspace{1em}
+\noindent\textit{Note: For more detailed analysis, empirical results, and theoretical diagnostics, please refer to the accompanying preliminary findings report.}
+
+\bibliographystyle{plainnat}
+\begin{thebibliography}{1}
+\bibitem[Ross et~al.(2011)]{ross2011reduction}
+S.~Ross, G.~Gordon, and D.~Bagnell.
+\newblock A reduction of imitation learning and structured prediction to no-regret online learning.
+\newblock In \textit{Proceedings of the 14th International Conference on Artificial Intelligence and Statistics (AISTATS)}, pages 627--635, 2011.
+\end{thebibliography}
+
+\end{document}
