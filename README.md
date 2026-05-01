@@ -1,6 +1,6 @@
 # EG-BDQN
 
-A minimal research prototype for **Epistemic-Gated Bootstrapped DQN** on `BabyAI-GoToDoor-v0`. The agent uses ensemble Q-head disagreement to estimate epistemic uncertainty and selectively queries a BabyAI Bot oracle under a finite budget.
+A minimal research prototype for **Epistemic-Gated Bootstrapped DQN (EG-BDQN)** on `BabyAI-GoToDoor-v0`. The agent uses ensemble Q-head disagreement to estimate epistemic uncertainty and selectively queries a BabyAI Bot oracle under a finite budget.
 
 *Note: This project is currently in active development and subject to significant changes.*
 
